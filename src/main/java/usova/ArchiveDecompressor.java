@@ -5,12 +5,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import usova.generated.Node;
 
-import javax.xml.namespace.QName;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.EventReaderDelegate;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -29,6 +30,7 @@ public class ArchiveDecompressor {
         try {
             BZip2CompressorInputStream in = new BZip2CompressorInputStream(new FileInputStream(FILE_PATH));
             reader = FACTORY.createXMLEventReader(in);
+            reader = new XsiTypeReader(reader);
         } catch (IOException | XMLStreamException e) {
             LOGGER.error(e.getMessage());
         }
@@ -38,7 +40,12 @@ public class ArchiveDecompressor {
         XmlResponse xmlResponse = new XmlResponse();
 
         try {
-            Node prevElementName = null;
+            JAXBContext jc = JAXBContext.newInstance(Node.class);
+            Unmarshaller unmarshaller = jc.createUnmarshaller();
+            Node node = (Node) unmarshaller.unmarshal(reader);
+
+            /*
+            Node node = null;
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -47,21 +54,20 @@ public class ArchiveDecompressor {
                     StartElement startElement = event.asStartElement();
 
                     if(startElement.getName().getLocalPart().equals(NODE)) {
-                        String user = startElement.getAttributeByName(new QName("user")).getValue();
-                        xmlResponse.incrementEdits(user);
-                        prevElementName = new Node();
-                    } else if(startElement.getName().getLocalPart().equals("tag") && prevElementName != null) {
-                        String k = startElement.getAttributeByName(new QName("k")).getValue();
-                        xmlResponse.incrementKeys(k);
+                        node = new Node();
+                        readNodeAttributes(node, startElement, xmlResponse);
+                    } else if(startElement.getName().getLocalPart().equals("tag") && node != null) {
+                        readNodeTag(node, startElement, xmlResponse);
                     }
                     else {
-                        prevElementName = null;
+                        node = null;
                     }
                 }
             }
             xmlResponse.sortAnswer();
+             */
             close();
-        } catch (XMLStreamException e) {
+        } catch (JAXBException e) {
             LOGGER.error(e.getMessage());
         }
         return xmlResponse;
@@ -74,6 +80,13 @@ public class ArchiveDecompressor {
             } catch (XMLStreamException e) {
                 LOGGER.error(e.getMessage());
             }
+        }
+    }
+
+
+    private static class XsiTypeReader extends EventReaderDelegate {
+        public XsiTypeReader(XMLEventReader reader) {
+            super(reader);
         }
     }
 }
