@@ -6,14 +6,23 @@ import org.apache.logging.log4j.Logger;
 import usova.generated.Node;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Namespace;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.EventReaderDelegate;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ArchiveDecompressor {
     private static final String FILE_PATH = "src/main/resources/RU-NVS.osm.bz2";
@@ -30,7 +39,7 @@ public class ArchiveDecompressor {
         try {
             BZip2CompressorInputStream in = new BZip2CompressorInputStream(new FileInputStream(FILE_PATH));
             reader = FACTORY.createXMLEventReader(in);
-            reader = new XsiTypeReader(reader);
+            reader = new XsiTypeReader(reader, "http://openstreetmap.org/osm/0.6");
         } catch (IOException | XMLStreamException e) {
             LOGGER.error(e.getMessage());
         }
@@ -42,32 +51,23 @@ public class ArchiveDecompressor {
         try {
             JAXBContext jc = JAXBContext.newInstance(Node.class);
             Unmarshaller unmarshaller = jc.createUnmarshaller();
-            Node node = (Node) unmarshaller.unmarshal(reader);
-
-            /*
-            Node node = null;
 
             while (reader.hasNext()) {
-                XMLEvent event = reader.nextEvent();
+                XMLEvent event = reader.peek();
 
                 if (event.isStartElement()) {
                     StartElement startElement = event.asStartElement();
 
                     if(startElement.getName().getLocalPart().equals(NODE)) {
-                        node = new Node();
-                        readNodeAttributes(node, startElement, xmlResponse);
-                    } else if(startElement.getName().getLocalPart().equals("tag") && node != null) {
-                        readNodeTag(node, startElement, xmlResponse);
-                    }
-                    else {
-                        node = null;
+                        JAXBElement<Node> node = unmarshaller.unmarshal(reader, Node.class);
                     }
                 }
+                reader.nextEvent();
             }
             xmlResponse.sortAnswer();
-             */
+
             close();
-        } catch (JAXBException e) {
+        } catch (XMLStreamException | JAXBException e) {
             LOGGER.error(e.getMessage());
         }
         return xmlResponse;
@@ -85,8 +85,51 @@ public class ArchiveDecompressor {
 
 
     private static class XsiTypeReader extends EventReaderDelegate {
-        public XsiTypeReader(XMLEventReader reader) {
+        private final XMLEventFactory factory = XMLEventFactory.newInstance();
+        private final String namespaceURI;
+
+        private int startElementCount = 0;
+
+        public XsiTypeReader(XMLEventReader reader, String namespaceURI) {
             super(reader);
+            this.namespaceURI = namespaceURI;
+        }
+
+        private StartElement withNamespace(StartElement startElement) {
+            List<Namespace> namespaces = new ArrayList<>();
+            namespaces.add(factory.createNamespace(namespaceURI));
+
+            Iterator<Namespace> originalNamespaces = startElement.getNamespaces();
+            while (originalNamespaces.hasNext()) {
+                namespaces.add(originalNamespaces.next());
+            }
+
+            return factory.createStartElement(
+                    new QName(namespaceURI, startElement.getName().getLocalPart()),
+                    startElement.getAttributes(),
+                    namespaces.iterator()
+            );
+        }
+
+        @Override
+        public XMLEvent nextEvent() throws XMLStreamException {
+            XMLEvent event = super.nextEvent();
+            if (event.isStartElement()) {
+                if (++startElementCount == 1) {
+                    return withNamespace(event.asStartElement());
+                }
+            }
+            return event;
+        }
+
+        @Override
+        public XMLEvent peek() throws XMLStreamException {
+            XMLEvent event = super.peek();
+            if (startElementCount == 0 && event.isStartElement()) {
+                return withNamespace(event.asStartElement());
+            } else {
+                return event;
+            }
         }
     }
 }
