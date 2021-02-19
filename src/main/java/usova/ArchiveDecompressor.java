@@ -3,6 +3,7 @@ package usova;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import usova.generated.Node;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -37,7 +38,7 @@ public class ArchiveDecompressor {
         XmlResponse xmlResponse = new XmlResponse();
 
         try {
-            String prevElementName = "";
+            Node prevElementName = null;
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -48,13 +49,13 @@ public class ArchiveDecompressor {
                     if(startElement.getName().getLocalPart().equals(NODE)) {
                         String user = startElement.getAttributeByName(new QName("user")).getValue();
                         xmlResponse.incrementEdits(user);
-                        prevElementName = NODE;
-                    } else if(startElement.getName().getLocalPart().equals("tag") && prevElementName.equals(NODE)) {
+                        prevElementName = new Node();
+                    } else if(startElement.getName().getLocalPart().equals("tag") && prevElementName != null) {
                         String k = startElement.getAttributeByName(new QName("k")).getValue();
                         xmlResponse.incrementKeys(k);
                     }
                     else {
-                        prevElementName = "";
+                        prevElementName = null;
                     }
                 }
             }
