@@ -29,8 +29,10 @@ dependencies {
     compile 'org.apache.commons:commons-compress:1.20'
     compile 'javax.xml.bind:jaxb-api:2.3.1'
     compile 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
-
     compile 'commons-cli:commons-cli:1.4'
+
+    compile 'org.postgresql:postgresql:42.2.16'
+
     compile sourceSets.jaxb2.output
 
     jaxb2 'org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.9.5'
