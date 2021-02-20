@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import usova.db.DbManager;
 import usova.db.PostgreConnectionManager;
+import usova.db.TimeMeasureImpl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,11 +16,8 @@ public class Main {
 
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        DbManager dbManager = new DbManager();
-
         logger.debug("Hello, world");
-        ArchiveDecompressor archiveDecompressor = new ArchiveDecompressor();
-        XmlResponse response = archiveDecompressor.read();
-        response.print();
+        TimeMeasureImpl timeMeasure = new TimeMeasureImpl();
+        timeMeasure.measureSaveTime();
     }
 }

@@ -1,13 +1,14 @@
 package usova.db.dao;
 
-import usova.db.PostgreConnectionManager;
 import usova.generated.Node;
 
 import java.math.BigInteger;
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
-public class NodeDao extends DbTable {
+public class NodeDao {
     private BigInteger id;
 
     private Double lat;
@@ -28,11 +29,7 @@ public class NodeDao extends DbTable {
 
     private List<TagDao> tags;
 
-    private PreparedStatement insert;
-
     public NodeDao(Node node) throws SQLException, ClassNotFoundException {
-        super();
-
         this.id = node.getId();
         this.lat = node.getLat();
         this.lon = node.getLon();
@@ -43,55 +40,55 @@ public class NodeDao extends DbTable {
         this.changeset = node.getChangeset();
         this.timestamp = new Timestamp(node.getTimestamp().toGregorianCalendar().getTimeInMillis());
 
-        node.getTag().forEach(tag -> {
-            try {
-                tags.add(new TagDao(tag, id));
-            } catch (SQLException | ClassNotFoundException throwables) {
-                throwables.printStackTrace();
-            }
-        });
+        this.tags = new ArrayList<>();
 
-        insert =  PostgreConnectionManager.getConnection().prepareCall("INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if (node.getTag() != null)
+            node.getTag().forEach(tag -> {
+                try {
+                    tags.add(new TagDao(tag, id));
+                } catch (SQLException | ClassNotFoundException throwables) {
+                    throwables.printStackTrace();
+                }
+            });
     }
 
-    @Override
-    public void saveWithPreparedStatement() throws SQLException {
-        insert.setLong(1, id.longValue());
-        insert.setDouble(2, lat);
-        insert.setDouble(3, lon);
-        insert.setString(4, user);
-        insert.setLong(5, uid.longValue());
-        insert.setBoolean(6, visible);
-        insert.setLong(7, version.longValue());
-        insert.setLong(8, changeset.longValue());
-        insert.setTimestamp(9, timestamp);
-
-        for (TagDao tag : tags) {
-            tag.saveWithPreparedStatement();
-        }
+    public BigInteger getId() {
+        return id;
     }
 
-    @Override
-    public void saveWithExecuteQuery() throws SQLException, ClassNotFoundException {
-        PostgreConnectionManager.getConnection().createStatement()
-                .executeQuery(String.format(
-                        "INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, $s, %s, %s, %s, %s, %s, %s, %s)",
-                        id, lat, lon, user, uid, visible, version, changeset, timestamp)
-                );
-
-        for(TagDao tag : tags) {
-            tag.saveWithExecuteQuery();
-        }
+    public Double getLat() {
+        return lat;
     }
 
-    @Override
-    public void saveWithBatch() throws SQLException {
-        if(batchSize < 100) {
-            batchInsert.addBatch(String.format(
-                    "INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, $s, %s, %s, %s, %s, %s, %s, %s)",
-                    id, lat, lon, user, uid, visible, version, changeset, timestamp));
-            batchSize++;
-        } else
-            flushBatch();
+    public Double getLon() {
+        return lon;
+    }
+
+    public BigInteger getUid() {
+        return uid;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public BigInteger getChangeset() {
+        return changeset;
+    }
+
+    public BigInteger getVersion() {
+        return version;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public List<TagDao> getTags() {
+        return tags;
+    }
+
+    public Timestamp getTimestamp() {
+        return timestamp;
     }
 }

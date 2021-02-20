@@ -51,6 +51,8 @@ dependencies {
     jaxb2Implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 
     testImplementation 'junit:junit:4.13'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.8'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.8'
 }
 
 jaxb2 {

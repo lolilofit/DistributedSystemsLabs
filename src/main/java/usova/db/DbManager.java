@@ -11,12 +11,16 @@ public class DbManager {
         initDb();
     }
 
-    public void initDb() throws SQLException {
-        connection.createStatement().executeQuery("DROP IF EXISTS TABLE Tag");
-        connection.createStatement().executeQuery("DROP IF EXISTS TABLE Node");
+    public void initDb() {
+        try {
+            connection.createStatement().execute("DROP TABLE IF EXISTS Tag");
+            connection.createStatement().execute("DROP TABLE IF EXISTS Node");
 
-        connection.createStatement().executeQuery("CREATE TABLE Node (id BIGINT, lat DECIMAL, lon DECIMAL, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, PRIMARY KEY (id))");
+            connection.createStatement().execute("CREATE TABLE Node (id BIGINT, lat DECIMAL, lon DECIMAL, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, PRIMARY KEY (id))");
 
-        connection.createStatement().executeQuery("CREATE TABLE Tag (k VARCHAR (2000), v VARCHAR (2000), PRIMARY KEY (k), nodeId BIGINT, FOREIGN KEY (nodeId) REFERENCES Node(id))");
+            connection.createStatement().execute("CREATE TABLE Tag (k VARCHAR (2000), v VARCHAR (2000), nodeId BIGINT, FOREIGN KEY (nodeId) REFERENCES Node(id))");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
