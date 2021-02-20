@@ -2,20 +2,19 @@ package usova.db.repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import usova.db.dao.DbTable;
 import usova.db.dao.TagDao;
 
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class TagRepository extends DbTable<TagDao> {
+public class TagRepository extends DbRepository<TagDao> {
     static final Logger logger = LogManager.getLogger(TagRepository.class.getName());
 
     private int count = 1;
 
     public TagRepository() throws SQLException, ClassNotFoundException {
         super();
-        insert = connection.prepareCall("INSERT INTO Tag (k, v, nodeId) VALUES (?, ?, ?)");
+        insert = connection.prepareCall("INSERT INTO NODE_TAG (k, v, nodeId) VALUES (?, ?, ?)");
     }
 
     @Override
@@ -47,7 +46,7 @@ public class TagRepository extends DbTable<TagDao> {
     public void saveWithExecuteQuery(TagDao o) {
         try {
             connection.createStatement()
-                    .execute(String.format("INSERT INTO Tag (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
+                    .execute(String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
         } catch (SQLException | NullPointerException e) {
             logger.error(e.getMessage());
         }
@@ -57,7 +56,7 @@ public class TagRepository extends DbTable<TagDao> {
     public void saveWithBatch(TagDao o) {
         try {
             batchInsert.addBatch(
-                    String.format("INSERT INTO Tag (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
+                    String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
             batchSize++;
             if (batchSize > 1000)
                 flushBatch();

@@ -1,6 +1,5 @@
 package usova.db.repository;
 
-import usova.db.dao.DbTable;
 import usova.db.dao.NodeDao;
 import usova.db.dao.TagDao;
 
@@ -8,12 +7,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 
-public class NodeRepository extends DbTable<NodeDao> {
+public class NodeRepository extends DbRepository<NodeDao> {
     private TagRepository tagRepository;
 
     public NodeRepository() throws SQLException, ClassNotFoundException {
         super();
-        insert = connection.prepareCall("INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insert = connection.prepareCall("INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         tagRepository = new TagRepository();
     }
 
@@ -80,7 +79,7 @@ public class NodeRepository extends DbTable<NodeDao> {
         try {
             connection.createStatement()
                     .execute(String.format(
-                            "INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, %s, '%s', %s, %s, %s, %s, '%s')",
+                            "INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, %s, '%s', %s, %s, %s, %s, '%s')",
                             o.getId(), o.getLat(), o.getLon(), o.getUser(), o.getUid(), o.getVisible(), o.getVersion(), o.getChangeset(), o.getTimestamp())
                     );
 
@@ -96,7 +95,7 @@ public class NodeRepository extends DbTable<NodeDao> {
     public void saveWithBatch(NodeDao o) {
         try {
             batchInsert.addBatch(String.format(
-                    "INSERT INTO Node (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, %s, '%s', %s, %s, %s, %s, '%s')",
+                    "INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, %s, '%s', %s, %s, %s, %s, '%s')",
                     o.getId(), o.getLat(), o.getLon(), o.getUser(), o.getUid(), o.getVisible(), o.getVersion(), o.getChangeset(), o.getTimestamp()));
             batchSize++;
 

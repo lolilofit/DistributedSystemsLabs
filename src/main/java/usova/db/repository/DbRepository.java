@@ -1,17 +1,16 @@
-package usova.db.dao;
+package usova.db.repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import usova.db.PostgreConnectionManager;
-import usova.db.repository.NodeRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public abstract class DbTable<T> {
-    protected static final Logger logger = LogManager.getLogger(DbTable.class.getName());
+public abstract class DbRepository<T> {
+    protected static final Logger logger = LogManager.getLogger(DbRepository.class.getName());
 
     protected PreparedStatement insert;
 
@@ -21,7 +20,7 @@ public abstract class DbTable<T> {
 
     protected Connection connection;
 
-    public DbTable() throws SQLException, ClassNotFoundException {
+    public DbRepository() throws SQLException, ClassNotFoundException {
         batchInsert = PostgreConnectionManager.getConnection().createStatement();
         connection = PostgreConnectionManager.getConnection();
     }
