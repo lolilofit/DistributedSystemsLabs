@@ -49,6 +49,8 @@ dependencies {
 
     jaxb2Implementation 'javax.xml.bind:jaxb-api:2.3.1'
     jaxb2Implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+
+    testImplementation 'junit:junit:4.13'
 }
 
 jaxb2 {
@@ -60,4 +62,8 @@ jaxb2 {
             extension = true
         }
     }
+}
+
+test {
+    useJUnit()
 }

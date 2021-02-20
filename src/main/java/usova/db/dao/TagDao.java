@@ -7,16 +7,16 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class TagDao implements DbTable {
+public class TagDao extends DbTable {
     private String k;
 
     private String v;
 
     private BigInteger nodeId;
 
-    private PreparedStatement insert;
-
     public TagDao(Tag tag, BigInteger nodeId) throws SQLException, ClassNotFoundException {
+        super();
+
         this.k = tag.getK();
         this.v = tag.getV();
         this.nodeId = nodeId;
@@ -37,5 +37,16 @@ public class TagDao implements DbTable {
     public void saveWithExecuteQuery() throws SQLException, ClassNotFoundException {
         PostgreConnectionManager.getConnection().createStatement()
                 .executeQuery(String.format("INSERT INTO Tag (k, v) VALUES (%s, %s, %s)", k, v, nodeId));
+    }
+
+    @Override
+    public void saveWithBatch() throws SQLException {
+        if(batchSize < 100) {
+            batchInsert.addBatch(
+                    String.format("INSERT INTO Tag (k, v) VALUES (%s, %s, %s)", k, v, nodeId));
+            batchSize++;
+        }
+        else
+            flushBatch();
     }
 }

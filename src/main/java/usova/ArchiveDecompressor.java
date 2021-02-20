@@ -35,23 +35,25 @@ public class ArchiveDecompressor {
 
     private XMLEventReader reader = null;
 
+    private JAXBContext jc;
+    private Unmarshaller unmarshaller;
+
     public ArchiveDecompressor() {
         try {
             BZip2CompressorInputStream in = new BZip2CompressorInputStream(new FileInputStream(FILE_PATH));
             reader = FACTORY.createXMLEventReader(in);
             reader = new XsiTypeReader(reader, "http://openstreetmap.org/osm/0.6");
-        } catch (IOException | XMLStreamException e) {
+
+            jc = JAXBContext.newInstance(Node.class);
+            unmarshaller = jc.createUnmarshaller();
+        } catch (IOException | XMLStreamException | JAXBException e) {
             LOGGER.error(e.getMessage());
         }
     }
 
     public XmlResponse read() {
         XmlResponse xmlResponse = new XmlResponse();
-
         try {
-            JAXBContext jc = JAXBContext.newInstance(Node.class);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
-
             while (reader.hasNext()) {
                 XMLEvent event = reader.peek();
 
@@ -71,6 +73,26 @@ public class ArchiveDecompressor {
             LOGGER.error(e.getMessage());
         }
         return xmlResponse;
+    }
+
+    public Node getNext() {
+        try {
+            while (reader.hasNext()) {
+                XMLEvent event = reader.peek();
+
+                if (event.isStartElement()) {
+                    StartElement startElement = event.asStartElement();
+
+                    if(startElement.getName().getLocalPart().equals(NODE)) {
+                        return unmarshaller.unmarshal(reader, Node.class).getValue();
+                    }
+                }
+                reader.nextEvent();
+            }
+        } catch (XMLStreamException | JAXBException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return null;
     }
 
     private void close() {

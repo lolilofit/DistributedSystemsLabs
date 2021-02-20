@@ -21,9 +21,5 @@ public class Main {
         ArchiveDecompressor archiveDecompressor = new ArchiveDecompressor();
         XmlResponse response = archiveDecompressor.read();
         response.print();
-
-        List<Integer> list = new ArrayList<>();
-        list.add(2);
-        list.remove(0);
     }
 }
