@@ -30,8 +30,8 @@ public class TagRepository extends DbRepository<TagDao> {
             else
                 insert.setNull(2, Types.NULL);
 
-            if (o.getNodeId() != null)
-                insert.setLong(3, o.getNodeId().longValue());
+            if (o.getRelatedId() != null)
+                insert.setLong(3, o.getRelatedId().longValue());
             else
                 insert.setNull(3, Types.NULL);
 
@@ -46,7 +46,7 @@ public class TagRepository extends DbRepository<TagDao> {
     public void saveWithExecuteQuery(TagDao o) {
         try {
             connection.createStatement()
-                    .execute(String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
+                    .execute(String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getRelatedId()));
         } catch (SQLException | NullPointerException e) {
             logger.error(e.getMessage());
         }
@@ -56,7 +56,7 @@ public class TagRepository extends DbRepository<TagDao> {
     public void saveWithBatch(TagDao o) {
         try {
             batchInsert.addBatch(
-                    String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getNodeId()));
+                    String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getRelatedId()));
             batchSize++;
             if (batchSize > 1000)
                 flushBatch();

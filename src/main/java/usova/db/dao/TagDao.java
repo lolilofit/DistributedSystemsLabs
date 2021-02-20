@@ -10,12 +10,12 @@ public class TagDao {
 
     private String v;
 
-    private BigInteger nodeId;
+    private BigInteger relatedId;
 
-    public TagDao(Tag tag, BigInteger nodeId) throws SQLException, ClassNotFoundException {
+    public TagDao(Tag tag, BigInteger nodeId) {
         this.k = tag.getK();
         this.v = tag.getV();
-        this.nodeId = nodeId;
+        this.relatedId = nodeId;
     }
 
     public String getK() {
@@ -26,7 +26,7 @@ public class TagDao {
         return v;
     }
 
-    public BigInteger getNodeId() {
-        return nodeId;
+    public BigInteger getRelatedId() {
+        return relatedId;
     }
 }

@@ -30,7 +30,7 @@ public class TimeMeasureImpl {
 
         Node node = archiveDecompressor.getNextNode();
         while (node != null) {
-            NodeDao nodeDao = new NodeDao(node);
+            NodeDao nodeDao = new NodeDao(node, null);
 
             long startTime = System.currentTimeMillis();
             consumer.accept(nodeDao);

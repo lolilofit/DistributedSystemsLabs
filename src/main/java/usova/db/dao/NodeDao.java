@@ -29,7 +29,9 @@ public class NodeDao {
 
     private List<TagDao> tags;
 
-    public NodeDao(Node node) throws SQLException, ClassNotFoundException {
+    private BigInteger osmId;
+
+    public NodeDao(Node node, BigInteger osmId) {
         this.id = node.getId();
         this.lat = node.getLat();
         this.lon = node.getLon();
@@ -38,18 +40,13 @@ public class NodeDao {
         this.visible = node.isVisible();
         this.version = node.getVersion();
         this.changeset = node.getChangeset();
+        this.osmId = osmId;
         this.timestamp = new Timestamp(node.getTimestamp().toGregorianCalendar().getTimeInMillis());
 
         this.tags = new ArrayList<>();
 
         if (node.getTag() != null)
-            node.getTag().forEach(tag -> {
-                try {
-                    tags.add(new TagDao(tag, id));
-                } catch (SQLException | ClassNotFoundException throwables) {
-                    throwables.printStackTrace();
-                }
-            });
+            node.getTag().forEach(tag -> tags.add(new TagDao(tag, id)));
     }
 
     public BigInteger getId() {

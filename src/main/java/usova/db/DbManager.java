@@ -32,7 +32,7 @@ public class DbManager {
 
             connection.createStatement().execute("CREATE TABLE NODE_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, nodeId BIGINT NOT NULL, FOREIGN KEY (nodeId) REFERENCES NODE (id))");
 
-            connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, PRIMARY KEY (id))");
+            connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osmId BIGINT, PRIMARY KEY (id), FOREIGN KEY (osmId) REFERENCES OSM (id)))");
 
             connection.createStatement().execute("CREATE TABLE RELATION_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, relationId BIGINT NOT NULL, FOREIGN KEY (relationId) REFERENCES RELATION (id))");
 
