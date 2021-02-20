@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public class TimeMeasureImpl {
     private static final Logger logger = LogManager.getLogger(TimeMeasureImpl.class.getName());
 
-    private static final int MAX_NODES = 5000;
+    private static final int MAX_NODES = 7000;
 
     private final NodeRepository nodeRepository;
 
@@ -51,10 +51,10 @@ public class TimeMeasureImpl {
 
     public void measureSaveTime() throws SQLException, ClassNotFoundException {
         double executeQueryTime = countSavingNodesSeconds(nodeRepository::saveWithExecuteQuery);
-        logger.info(String.format("SAVE WITH EXECUTE QUERY TIME = %s", executeQueryTime));
+        logger.info(String.format("SAVE WITH EXECUTE QUERY TIME = %s (rows/sec)", MAX_NODES / executeQueryTime));
 
         double preparedTime = countSavingNodesSeconds(nodeRepository::saveWithPreparedStatement);
-        logger.info(String.format("SAVE WITH PREPARED STATEMENT TIME = %s", preparedTime));
+        logger.info(String.format("SAVE WITH PREPARED STATEMENT TIME = %s (rows/sec)", MAX_NODES / preparedTime));
 
         double batchTime = countSavingNodesSeconds(nodeRepository::saveWithBatch);
         long startTime = System.currentTimeMillis();
@@ -62,6 +62,6 @@ public class TimeMeasureImpl {
         long endTime = System.currentTimeMillis();
 
         batchTime += (double) (endTime - startTime) / 1000.0;
-        logger.info(String.format("SAVE WITH BATCH TIME = %s", batchTime));
+        logger.info(String.format("SAVE WITH BATCH TIME = %s (rows/sec)",  MAX_NODES / batchTime));
     }
 }
