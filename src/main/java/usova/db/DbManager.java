@@ -4,15 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DbManager {
-    Connection connection;
-
-    public DbManager() throws SQLException, ClassNotFoundException {
-        connection = PostgreConnectionManager.getConnection();
-        initDb();
-    }
-
-    public void initDb() {
+    public static void initDb() {
         try {
+            Connection connection = PostgreConnectionManager.getConnection();
             connection.createStatement().execute("DROP TABLE IF EXISTS NODE_TAG");
             connection.createStatement().execute("DROP TABLE IF EXISTS RELATION_TAG");
             connection.createStatement().execute("DROP TABLE IF EXISTS WAY_TAG");
@@ -32,7 +26,7 @@ public class DbManager {
 
             connection.createStatement().execute("CREATE TABLE NODE_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, nodeId BIGINT NOT NULL, FOREIGN KEY (nodeId) REFERENCES NODE (id))");
 
-            connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osmId BIGINT, PRIMARY KEY (id), FOREIGN KEY (osmId) REFERENCES OSM (id)))");
+            connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osmId BIGINT, PRIMARY KEY (id), FOREIGN KEY (osmId) REFERENCES OSM (id))");
 
             connection.createStatement().execute("CREATE TABLE RELATION_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, relationId BIGINT NOT NULL, FOREIGN KEY (relationId) REFERENCES RELATION (id))");
 
@@ -43,7 +37,7 @@ public class DbManager {
             connection.createStatement().execute("CREATE TABLE WAY_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, wayId BIGINT NOT NULL, FOREIGN KEY (wayId) REFERENCES WAY (id))");
 
             connection.createStatement().execute("CREATE TABLE ND (ref BIGINT, wayId BIGINT, FOREIGN  KEY (wayId) REFERENCES WAY (id))");
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

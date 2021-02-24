@@ -3,8 +3,11 @@ package usova.db.repository;
 import usova.db.dao.NodeDao;
 import usova.db.dao.TagDao;
 
+import java.math.BigInteger;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 
 public class NodeRepository extends DbRepository<NodeDao> {
@@ -12,7 +15,8 @@ public class NodeRepository extends DbRepository<NodeDao> {
 
     public NodeRepository() throws SQLException, ClassNotFoundException {
         super();
-        insert = connection.prepareCall("INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertStatement = connection.prepareCall("INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        getByIdStatement = connection.prepareCall("SELECT * FROM NODE WHERE ID = ?");
         tagRepository = new TagRepository();
     }
 
@@ -20,51 +24,51 @@ public class NodeRepository extends DbRepository<NodeDao> {
     public void saveWithPreparedStatement(NodeDao o) {
         try {
             if (o.getId() != null)
-                insert.setLong(1, o.getId().longValue());
+                insertStatement.setLong(1, o.getId().longValue());
             else
-                insert.setNull(1, Types.NULL);
+                insertStatement.setNull(1, Types.NULL);
 
             if (o.getLat() != null)
-                insert.setDouble(2, o.getLat());
+                insertStatement.setDouble(2, o.getLat());
             else
-                insert.setNull(2, Types.NULL);
+                insertStatement.setNull(2, Types.NULL);
 
             if (o.getLon() != null)
-                insert.setDouble(3, o.getLon());
+                insertStatement.setDouble(3, o.getLon());
             else
-                insert.setNull(3, Types.NULL);
+                insertStatement.setNull(3, Types.NULL);
 
             if (o.getUser() != null)
-                insert.setString(4, o.getUser());
+                insertStatement.setString(4, o.getUser());
             else
-                insert.setNull(4, Types.NULL);
+                insertStatement.setNull(4, Types.NULL);
 
             if (o.getUid() != null)
-                insert.setLong(5, o.getUid().longValue());
+                insertStatement.setLong(5, o.getUid().longValue());
             else
-                insert.setNull(5, Types.NULL);
+                insertStatement.setNull(5, Types.NULL);
 
             if (o.getVisible() != null)
-                insert.setBoolean(6, o.getVisible());
+                insertStatement.setBoolean(6, o.getVisible());
             else
-                insert.setNull(6, Types.NULL);
+                insertStatement.setNull(6, Types.NULL);
 
             if (o.getVersion() != null)
-                insert.setLong(7, o.getVersion().longValue());
+                insertStatement.setLong(7, o.getVersion().longValue());
             else
-                insert.setNull(7, Types.NULL);
+                insertStatement.setNull(7, Types.NULL);
 
             if (o.getChangeset() != null)
-                insert.setLong(8, o.getChangeset().longValue());
+                insertStatement.setLong(8, o.getChangeset().longValue());
             else
-                insert.setNull(8, Types.NULL);
+                insertStatement.setNull(8, Types.NULL);
 
             if (o.getTimestamp() != null)
-                insert.setTimestamp(9, o.getTimestamp());
+                insertStatement.setTimestamp(9, o.getTimestamp());
             else
-                insert.setNull(9, Types.NULL);
+                insertStatement.setNull(9, Types.NULL);
 
-            insert.execute();
+            insertStatement.execute();
 
             for (TagDao tag : o.getTags()) {
                 tagRepository.saveWithPreparedStatement(tag);
@@ -94,7 +98,7 @@ public class NodeRepository extends DbRepository<NodeDao> {
     @Override
     public void saveWithBatch(NodeDao o) {
         try {
-            batchInsert.addBatch(String.format(
+            batchInsertStatement.addBatch(String.format(
                     "INSERT INTO NODE (id, lat, lon, _user, uid, visible, version, changeset, _timestamp) VALUES (%s, %s, %s, '%s', %s, %s, %s, %s, '%s')",
                     o.getId(), o.getLat(), o.getLon(), o.getUser(), o.getUid(), o.getVisible(), o.getVersion(), o.getChangeset(), o.getTimestamp()));
             batchSize++;
@@ -115,5 +119,23 @@ public class NodeRepository extends DbRepository<NodeDao> {
     public void flushBatch() {
         super.flushBatch();
         tagRepository.flushBatch();
+    }
+
+    @Override
+    public List<NodeDao> getById(BigInteger id) {
+        if(id == null)
+            return null;
+
+        try {
+            getByIdStatement.setLong(1, id.longValue());
+            ResultSet result = getByIdStatement.executeQuery();
+            if(!result.next())
+                return null;
+
+            return List.of(NodeDao.extractFromResultSet(result));
+        } catch (SQLException | ClassNotFoundException e) {
+            logger.error(e.getMessage());
+        }
+        return null;
     }
 }

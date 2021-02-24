@@ -21,8 +21,9 @@ public class TimeMeasureImpl {
         nodeRepository = new NodeRepository();
     }
 
-    public double countSavingNodesSeconds(Consumer<NodeDao> consumer) throws SQLException, ClassNotFoundException {
-        DbManager dbManager = new DbManager();
+    public double countSavingNodesSeconds(Consumer<NodeDao> consumer) {
+        DbManager.initDb();
+
         int nodesCount = 0;
         long totalTime = 0;
 
