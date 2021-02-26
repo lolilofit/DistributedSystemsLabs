@@ -69,7 +69,6 @@ public class ArchiveDecompressor {
 
     private static class XsiTypeReader extends StreamReaderDelegate {
         private final String namespaceURI;
-        private int startElementCount = 0;
 
         public XsiTypeReader(XMLStreamReader reader, String namespaceURI) {
             super(reader);

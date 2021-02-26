@@ -41,12 +41,12 @@ public class RelationDao {
         this.osmId = osmId;
 
         this.tag = new ArrayList<>();
-        if(relation.getTag() != null)
-            relation.getTag().forEach(t -> tag.add(new TagDao(t, id)));
+//        if(relation.getTag() != null)
+//            relation.getTag().forEach(t -> tag.add(new TagDao(t, id)));
 
         this.member = new ArrayList<>();
-        if(relation.getMember() != null)
-            relation.getMember().forEach(m -> member.add(new MemberDao(m, id)));
+//        if(relation.getMember() != null)
+//            relation.getMember().forEach(m -> member.add(new MemberDao(m, id)));
     }
 
     public BigInteger getOsmId() {

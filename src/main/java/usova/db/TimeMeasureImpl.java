@@ -2,14 +2,17 @@ package usova.db;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import usova.ArchiveDecompressor;
 import usova.db.dao.NodeDao;
-import usova.db.repository.NodeRepository;
+import usova.db.repository.jpa.NodeRepository;
 import usova.generated.Node;
 
+import javax.annotation.PostConstruct;
 import java.sql.SQLException;
-import java.util.function.Consumer;
 
+@Service
 public class TimeMeasureImpl {
     private static final Logger logger = LogManager.getLogger(TimeMeasureImpl.class.getName());
 
@@ -17,11 +20,13 @@ public class TimeMeasureImpl {
 
     private final NodeRepository nodeRepository;
 
-    public TimeMeasureImpl() throws SQLException, ClassNotFoundException {
-        nodeRepository = new NodeRepository();
+    @Autowired
+    public TimeMeasureImpl(NodeRepository nodeRepository) throws SQLException, ClassNotFoundException {
+        this.nodeRepository = nodeRepository;
     }
 
-    public double countSavingNodesSeconds(Consumer<NodeDao> consumer) {
+    @PostConstruct
+    public void countSavingNodesSeconds() {
         DbManager.initDb();
 
         int nodesCount = 0;
@@ -31,10 +36,14 @@ public class TimeMeasureImpl {
 
         Node node = archiveDecompressor.getNextNode();
         while (node != null) {
-            NodeDao nodeDao = new NodeDao(node, null);
+            NodeDao nodeDao = new NodeDao(node);
 
             long startTime = System.currentTimeMillis();
-            consumer.accept(nodeDao);
+            try {
+                nodeRepository.save(nodeDao);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             long endTime = System.currentTimeMillis();
 
             totalTime += endTime - startTime;
@@ -46,23 +55,5 @@ public class TimeMeasureImpl {
             node = archiveDecompressor.getNextNode();
         }
         archiveDecompressor.close();
-
-        return (double) totalTime / 1000.0;
-    }
-
-    public void measureSaveTime() throws SQLException, ClassNotFoundException {
-        double executeQueryTime = countSavingNodesSeconds(nodeRepository::saveWithExecuteQuery);
-        logger.info(String.format("SAVE WITH EXECUTE QUERY TIME = %s (rows/sec)", MAX_NODES / executeQueryTime));
-
-        double preparedTime = countSavingNodesSeconds(nodeRepository::saveWithPreparedStatement);
-        logger.info(String.format("SAVE WITH PREPARED STATEMENT TIME = %s (rows/sec)", MAX_NODES / preparedTime));
-
-        double batchTime = countSavingNodesSeconds(nodeRepository::saveWithBatch);
-        long startTime = System.currentTimeMillis();
-        nodeRepository.flushBatch();
-        long endTime = System.currentTimeMillis();
-
-        batchTime += (double) (endTime - startTime) / 1000.0;
-        logger.info(String.format("SAVE WITH BATCH TIME = %s (rows/sec)",  MAX_NODES / batchTime));
     }
 }

@@ -28,16 +28,8 @@ public class OsmDao {
         this.id = id;
 
         this.relation = new ArrayList<>();
-        if (osm.getRelation() != null)
-            osm.getRelation().forEach(r -> relation.add(new RelationDao(r, id)));
-
         this.node = new ArrayList<>();
-        if (osm.getNode() != null)
-            osm.getNode().forEach(n -> node.add(new NodeDao(n, id)));
-
         this.way = new ArrayList<>();
-        if (osm.getWay() != null)
-            osm.getWay().forEach(w -> way.add(new WayDao(w, id)));
     }
 
     public BigInteger getId() {

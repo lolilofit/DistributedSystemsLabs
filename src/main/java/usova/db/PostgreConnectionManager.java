@@ -13,7 +13,7 @@ public class PostgreConnectionManager {
 
     private static volatile Connection connection = null;
 
-    public static Connection getConnection() throws ClassNotFoundException, SQLException {
+    public static Connection getConnection() throws SQLException {
         if(connection == null) {
             Properties props = new Properties();
             props.setProperty("user", "postgres");

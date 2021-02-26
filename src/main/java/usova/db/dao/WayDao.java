@@ -41,8 +41,8 @@ public class WayDao {
             way.getNd().forEach(nd -> ndDaos.add(new NdDao(nd, id)));
 
         this.tags = new ArrayList<>();
-        if (way.getTag() != null)
-            way.getTag().forEach(tag -> tags.add(new TagDao(tag, id)));
+      //  if (way.getTag() != null)
+      //      way.getTag().forEach(tag -> tags.add(new TagDao(tag, id)));
     }
 
     public List<NdDao> getNdDaos() {

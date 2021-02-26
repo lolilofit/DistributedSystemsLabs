@@ -2,58 +2,67 @@ package usova.db.dao;
 
 import usova.generated.Tag;
 
+import javax.persistence.*;
 import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
+@Entity
+@Table(name = "NODE_TAG")
 public class TagDao {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private BigInteger id;
+
+    @Column(name = "k")
     private String k;
 
+    @Column(name = "v")
     private String v;
 
-    private BigInteger relatedId;
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "NODEID")
+    private NodeDao nodeId;
 
-    public TagDao(Tag tag, BigInteger nodeId) {
+    public TagDao(Tag tag, NodeDao nodeId) {
         this.k = tag.getK();
         this.v = tag.getV();
-        this.relatedId = nodeId;
+
+        this.nodeId = nodeId;
     }
 
     public TagDao() {
 
     }
 
-    public static TagDao extractFromResultSet(ResultSet result) throws SQLException {
-        TagDao tagDao = new TagDao();
-
-        tagDao.setK(result.getString(1));
-        tagDao.setV(result.getString(2));
-        tagDao.setRelatedId(BigInteger.valueOf(result.getLong(3)));
-
-        return tagDao;
-    }
-
-    public String getK() {
-        return k;
-    }
-
-    public String getV() {
-        return v;
-    }
-
-    public BigInteger getRelatedId() {
-        return relatedId;
+    public void setV(String v) {
+        this.v = v;
     }
 
     public void setK(String k) {
         this.k = k;
     }
 
-    public void setRelatedId(BigInteger relatedId) {
-        this.relatedId = relatedId;
+    public String getV() {
+        return v;
     }
 
-    public void setV(String v) {
-        this.v = v;
+    public String getK() {
+        return k;
+    }
+
+    public NodeDao getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(NodeDao nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
+    public BigInteger getId() {
+        return id;
     }
 }

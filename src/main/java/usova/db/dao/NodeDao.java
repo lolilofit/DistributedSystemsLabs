@@ -1,40 +1,49 @@
 package usova.db.dao;
 
-import usova.db.repository.TagRepository;
 import usova.generated.Node;
 
+import javax.persistence.*;
 import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLData;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+@Entity
+@Table(name = "Node")
 public class NodeDao {
+    @Id
+    @Column(name = "id")
     private BigInteger id;
 
+    @Column(name = "lat")
     private Double lat;
 
+    @Column(name = "lon")
     private Double lon;
 
+    @Column(name = "_user")
     private String user;
 
+    @Column(name = "uid")
     private BigInteger uid;
 
+    @Column(name = "visible")
     private Boolean visible;
 
+    @Column(name = "version")
     private BigInteger version;
 
+    @Column(name = "changeset")
     private BigInteger changeset;
 
+    @Column(name = "_timestamp")
     private Timestamp timestamp;
 
-    private List<TagDao> tags;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "nodeId", cascade = CascadeType.ALL)
+    private Collection<TagDao> tags;
 
-    private BigInteger osmId;
-
-    public NodeDao(Node node, BigInteger osmId) {
+    public NodeDao(Node node) {
         this.id = node.getId();
         this.lat = node.getLat();
         this.lon = node.getLon();
@@ -43,35 +52,14 @@ public class NodeDao {
         this.visible = node.isVisible();
         this.version = node.getVersion();
         this.changeset = node.getChangeset();
-        this.osmId = osmId;
         this.timestamp = new Timestamp(node.getTimestamp().toGregorianCalendar().getTimeInMillis());
 
-        this.tags = new ArrayList<>();
-
-        if (node.getTag() != null)
-            node.getTag().forEach(tag -> tags.add(new TagDao(tag, id)));
+        tags = new ArrayList<>();
+        if(node.getTag() != null)
+            node.getTag().forEach(t -> tags.add(new TagDao(t, this)));
     }
 
     public NodeDao() {}
-
-    public static NodeDao extractFromResultSet(ResultSet result) throws SQLException, ClassNotFoundException {
-        NodeDao nodeDao = new NodeDao();
-
-        nodeDao.setId(BigInteger.valueOf(result.getLong(1)));
-        nodeDao.setLat(result.getDouble(2));
-        nodeDao.setLon(result.getDouble(3));
-        nodeDao.setUser(result.getString(4));
-        nodeDao.setUid(BigInteger.valueOf(result.getLong(5)));
-        nodeDao.setVisible(result.getBoolean(6));
-        nodeDao.setVersion(BigInteger.valueOf(result.getLong(7)));
-        nodeDao.setChangeset(BigInteger.valueOf(result.getLong(8)));
-        nodeDao.setTimestamp(result.getTimestamp(9));
-
-        TagRepository tagRepository = new TagRepository();
-        nodeDao.setTags(tagRepository.getById(nodeDao.getId()));
-
-        return nodeDao;
-    }
 
     public BigInteger getId() {
         return id;
@@ -105,7 +93,7 @@ public class NodeDao {
         return visible;
     }
 
-    public List<TagDao> getTags() {
+    public Collection<TagDao> getTags() {
         return tags;
     }
 
@@ -133,15 +121,11 @@ public class NodeDao {
         this.uid = uid;
     }
 
-    public BigInteger getOsmId() {
-        return osmId;
-    }
-
     public void setChangeset(BigInteger changeset) {
         this.changeset = changeset;
     }
 
-    public void setTags(List<TagDao> tags) {
+    public void setTags(Collection<TagDao> tags) {
         this.tags = tags;
     }
 
@@ -151,10 +135,6 @@ public class NodeDao {
 
     public void setUser(String user) {
         this.user = user;
-    }
-
-    public void setOsmId(BigInteger osmId) {
-        this.osmId = osmId;
     }
 
     public void setVisible(Boolean visible) {

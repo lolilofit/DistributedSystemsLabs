@@ -24,7 +24,7 @@ public class DbManager {
 
             connection.createStatement().execute("CREATE TABLE NODE (id BIGINT, lat DECIMAL, lon DECIMAL, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osm BIGINT, PRIMARY KEY (id), FOREIGN KEY (osm) REFERENCES OSM (id))");
 
-            connection.createStatement().execute("CREATE TABLE NODE_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, nodeId BIGINT NOT NULL, FOREIGN KEY (nodeId) REFERENCES NODE (id))");
+            connection.createStatement().execute("CREATE TABLE NODE_TAG (id BIGINT, k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, nodeId BIGINT NOT NULL, PRIMARY KEY (id), FOREIGN KEY (nodeId) REFERENCES NODE (id))");
 
             connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osmId BIGINT, PRIMARY KEY (id), FOREIGN KEY (osmId) REFERENCES OSM (id))");
 
@@ -37,7 +37,7 @@ public class DbManager {
             connection.createStatement().execute("CREATE TABLE WAY_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, wayId BIGINT NOT NULL, FOREIGN KEY (wayId) REFERENCES WAY (id))");
 
             connection.createStatement().execute("CREATE TABLE ND (ref BIGINT, wayId BIGINT, FOREIGN  KEY (wayId) REFERENCES WAY (id))");
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
