@@ -28,15 +28,15 @@ public class DbManager {
 
             connection.createStatement().execute("CREATE TABLE RELATION (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osmId BIGINT, PRIMARY KEY (id), FOREIGN KEY (osmId) REFERENCES OSM (id))");
 
-            connection.createStatement().execute("CREATE TABLE RELATION_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, relationId BIGINT NOT NULL, FOREIGN KEY (relationId) REFERENCES RELATION (id))");
+            connection.createStatement().execute("CREATE TABLE RELATION_TAG (id BIGINT, k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, relationId BIGINT NOT NULL, PRIMARY KEY (id), FOREIGN KEY (relationId) REFERENCES RELATION (id))");
 
-            connection.createStatement().execute("CREATE TABLE MEMBER (type VARCHAR(2000), ref BIGINT, role VARCHAR (2000), relation BIGINT, FOREIGN KEY (relation) REFERENCES RELATION (id))");
+            connection.createStatement().execute("CREATE TABLE MEMBER (id BIGINT, type VARCHAR(2000), ref BIGINT, role VARCHAR (2000), relation BIGINT, PRIMARY KEY (id), FOREIGN KEY (relation) REFERENCES RELATION (id))");
 
             connection.createStatement().execute("CREATE TABLE WAY (id BIGINT, _user VARCHAR(2000), uid BIGINT, visible BOOLEAN, version BIGINT, changeset BIGINT, _timestamp TIMESTAMP, osm BIGINT, PRIMARY KEY (id), FOREIGN KEY (osm) REFERENCES OSM (id))");
 
-            connection.createStatement().execute("CREATE TABLE WAY_TAG (k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, wayId BIGINT NOT NULL, FOREIGN KEY (wayId) REFERENCES WAY (id))");
+            connection.createStatement().execute("CREATE TABLE WAY_TAG (id BIGINT, k VARCHAR (2000) NOT NULL, v VARCHAR (2000) NOT NULL, wayId BIGINT NOT NULL, PRIMARY KEY (id), FOREIGN KEY (wayId) REFERENCES WAY (id))");
 
-            connection.createStatement().execute("CREATE TABLE ND (ref BIGINT, wayId BIGINT, FOREIGN  KEY (wayId) REFERENCES WAY (id))");
+            connection.createStatement().execute("CREATE TABLE ND (id BIGINT, ref BIGINT, wayId BIGINT, PRIMARY KEY (id), FOREIGN  KEY (wayId) REFERENCES WAY (id))");
         } catch (SQLException e) {
             e.printStackTrace();
         }

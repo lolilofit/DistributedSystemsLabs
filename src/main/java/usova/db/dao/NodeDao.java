@@ -7,41 +7,40 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "Node")
 public class NodeDao {
     @Id
     @Column(name = "id")
-    private BigInteger id;
+    protected BigInteger id;
 
     @Column(name = "lat")
-    private Double lat;
+    protected Double lat;
 
     @Column(name = "lon")
-    private Double lon;
+    protected Double lon;
 
     @Column(name = "_user")
-    private String user;
+    protected String user;
 
     @Column(name = "uid")
-    private BigInteger uid;
+    protected BigInteger uid;
 
     @Column(name = "visible")
-    private Boolean visible;
+    protected Boolean visible;
 
     @Column(name = "version")
-    private BigInteger version;
+    protected BigInteger version;
 
     @Column(name = "changeset")
-    private BigInteger changeset;
+    protected BigInteger changeset;
 
     @Column(name = "_timestamp")
-    private Timestamp timestamp;
+    protected Timestamp timestamp;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "nodeId", cascade = CascadeType.ALL)
-    private Collection<TagDao> tags;
+    protected Collection<NodeTagDao> tags;
 
     public NodeDao(Node node) {
         this.id = node.getId();
@@ -56,7 +55,7 @@ public class NodeDao {
 
         tags = new ArrayList<>();
         if(node.getTag() != null)
-            node.getTag().forEach(t -> tags.add(new TagDao(t, this)));
+            node.getTag().forEach(t -> tags.add(new NodeTagDao(t, this)));
     }
 
     public NodeDao() {}
@@ -93,7 +92,7 @@ public class NodeDao {
         return visible;
     }
 
-    public Collection<TagDao> getTags() {
+    public Collection<NodeTagDao> getTags() {
         return tags;
     }
 
@@ -125,7 +124,7 @@ public class NodeDao {
         this.changeset = changeset;
     }
 
-    public void setTags(Collection<TagDao> tags) {
+    public void setTags(Collection<NodeTagDao> tags) {
         this.tags = tags;
     }
 
