@@ -6,6 +6,7 @@ import usova.db.dao.NodeDao;
 import usova.db.dao.TagDao;
 
 import java.math.BigInteger;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -19,26 +20,30 @@ public class TagRepository extends DbRepository<TagDao> {
         super();
         insertStatement = connection.prepareCall("INSERT INTO NODE_TAG (k, v, nodeId) VALUES (?, ?, ?)");
         getByIdStatement = connection.prepareCall("SELECT * FROM NODE_TAG WHERE NODEID = ?");
+        batchInsertStatement = connection.prepareCall("INSERT INTO NODE_TAG (k, v, nodeId) VALUES (?, ?, ?)");
+    }
+
+    private void fillParams(TagDao o, PreparedStatement statement) throws SQLException {
+        if (o.getK() != null)
+            statement.setString(1, o.getK());
+        else
+            statement.setNull(1, Types.NULL);
+
+        if (o.getV() != null)
+            statement.setString(2, o.getV());
+        else
+            statement.setNull(2, Types.NULL);
+
+        if (o.getRelatedId() != null)
+            statement.setLong(3, o.getRelatedId().longValue());
+        else
+            statement.setNull(3, Types.NULL);
     }
 
     @Override
     public void saveWithPreparedStatement(TagDao o) {
         try {
-            if (o.getK() != null)
-                insertStatement.setString(1, o.getK());
-            else
-                insertStatement.setNull(1, Types.NULL);
-
-            if (o.getV() != null)
-                insertStatement.setString(2, o.getV());
-            else
-                insertStatement.setNull(2, Types.NULL);
-
-            if (o.getRelatedId() != null)
-                insertStatement.setLong(3, o.getRelatedId().longValue());
-            else
-                insertStatement.setNull(3, Types.NULL);
-
+            fillParams(o, insertStatement);
             insertStatement.execute();
 
         } catch (SQLException e) {
@@ -59,8 +64,8 @@ public class TagRepository extends DbRepository<TagDao> {
     @Override
     public void saveWithBatch(TagDao o) {
         try {
-            batchInsertStatement.addBatch(
-                    String.format("INSERT INTO NODE_TAG (k, v, nodeId) VALUES ('%s', '%s', %s)", o.getK(), o.getV(), o.getRelatedId()));
+            fillParams(o, batchInsertStatement);
+            batchInsertStatement.addBatch();
             batchSize++;
             if (batchSize > 1000)
                 flushBatch();

@@ -18,14 +18,13 @@ public abstract class DbRepository<T> {
 
     protected PreparedStatement getByIdStatement;
 
-    protected Statement batchInsertStatement;
+    protected PreparedStatement batchInsertStatement;
 
     protected int batchSize;
 
     protected Connection connection;
 
     public DbRepository() throws SQLException, ClassNotFoundException {
-        batchInsertStatement = PostgreConnectionManager.getConnection().createStatement();
         connection = PostgreConnectionManager.getConnection();
     }
 
